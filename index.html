@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Our First Anniversary</title>
+  <style>
+    :root {
+      --pink: #ff8fb1;
+      --rose: #ff5d8f;
+      --cream: #fff3f8;
+      --lavender: #c1b6ff;
+      --ink: #2d1b3d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Nunito", "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(circle at top, #ffe2ed, #fff);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    body.locked main {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .game-gate {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 243, 248, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 10;
+      transition: opacity 400ms ease, visibility 400ms ease;
+    }
+
+    .gate-hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .gate-card {
+      background: #fff;
+      padding: clamp(1.5rem, 4vw, 2.75rem);
+      border-radius: 28px;
+      width: min(480px, 100%);
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(255, 141, 177, 0.25);
+      border: 2px solid rgba(255, 141, 177, 0.2);
+    }
+
+    .gate-card h2 {
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    .click-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .click-btn {
+      border: none;
+      border-radius: 20px;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--cream);
+      color: var(--rose);
+      cursor: pointer;
+      transition: transform 150ms ease, background 150ms ease, color 150ms ease;
+    }
+
+    .click-btn:active {
+      transform: scale(0.96);
+    }
+
+    .click-btn[disabled] {
+      background: rgba(0, 0, 0, 0.05);
+      color: rgba(0, 0, 0, 0.35);
+      cursor: not-allowed;
+    }
+
+    .gate-status {
+      font-weight: 600;
+      color: var(--rose);
+      min-height: 1.5rem;
+    }
+
+    main {
+      background: rgba(255, 255, 255, 0.9);
+      width: min(960px, 100%);
+      border-radius: 32px;
+      box-shadow: 0 20px 35px rgba(255, 141, 177, 0.25);
+      overflow: hidden;
+      position: relative;
+    }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1.25rem 1.5rem;
+      background: linear-gradient(135deg, var(--pink), var(--lavender));
+      color: #fff;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: clamp(2rem, 6vw, 3rem);
+      margin: 0 0 0.25rem;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    section {
+      padding: clamp(1.5rem, 4vw, 3rem);
+      display: grid;
+      gap: clamp(1rem, 3vw, 2rem);
+    }
+
+    .love-meter {
+      background: var(--cream);
+      border-radius: 24px;
+      padding: 1.5rem;
+    }
+
+    .love-meter h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+    }
+
+    .heart-graphic {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      padding-block: 0.75rem 0;
+    }
+
+    .heart-graphic span {
+      font-size: 3rem;
+      display: inline-block;
+      transition: transform 250ms ease;
+    }
+
+    .deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 1.25rem;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 12px 20px rgba(45, 27, 61, 0.08);
+      transition: transform 250ms ease, box-shadow 250ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 28px rgba(45, 27, 61, 0.12);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.25rem;
+    }
+
+    .card p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .memory-slider {
+      position: relative;
+      padding: 1.5rem;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #fff, #ffe3f0);
+    }
+
+    .memory-slider button {
+      background: var(--rose);
+      border: none;
+      color: #fff;
+      border-radius: 999px;
+      padding: 0.65rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .memory-slider button:active {
+      transform: scale(0.98);
+    }
+
+    .memory-text {
+      font-size: 1.2rem;
+      min-height: 3.5rem;
+      margin: 1rem 0 0.5rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .love-notes {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .love-note {
+      background: var(--cream);
+      padding: 1rem;
+      border-radius: 18px;
+      font-size: 0.95rem;
+      position: relative;
+      padding-left: 3.5rem;
+    }
+
+    .love-note::before {
+      content: "♥";
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: var(--rose);
+      opacity: 0.6;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem 3rem;
+      background: var(--cream);
+    }
+
+    .footer button {
+      border: none;
+      background: var(--lavender);
+      color: var(--ink);
+      padding: 0.8rem 1.5rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 200ms ease, background 200ms ease;
+    }
+
+    .footer button:hover {
+      transform: translateY(-2px);
+      background: var(--pink);
+      color: #fff;
+    }
+
+    .photo-gallery {
+      position: relative;
+    }
+
+    .gallery-track {
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 0.5rem 0 1.75rem;
+      margin: 0;
+    }
+
+    .gallery-track::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .gallery-track::-webkit-scrollbar-thumb {
+      background: var(--rose);
+      border-radius: 999px;
+    }
+
+    .photo-card {
+      flex: 0 0 80%;
+      max-width: 80%;
+      border-radius: 28px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 3 / 4;
+      scroll-snap-align: center;
+      box-shadow: 0 25px 45px rgba(45, 27, 61, 0.25);
+    }
+
+    @media (min-width: 700px) {
+      .photo-card {
+        flex-basis: 55%;
+        max-width: 55%;
+      }
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-card figcaption {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      color: #fff;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75));
+    }
+
+    .gallery-controls {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .gallery-nav {
+      pointer-events: auto;
+      border: none;
+      background: rgba(255, 255, 255, 0.85);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      box-shadow: 0 10px 18px rgba(45, 27, 61, 0.2);
+      font-size: 1.2rem;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      margin: 0 0.25rem;
+    }
+
+    .gallery-nav:active {
+      transform: scale(0.95);
+    }
+
+    .love-letter-btn {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 600;
+    }
+
+    .letter-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(45, 27, 61, 0.65);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease;
+    }
+
+    .letter-modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .letter-card {
+      background: #fff;
+      max-width: 640px;
+      width: 100%;
+      border-radius: 28px;
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      box-shadow: 0 25px 45px rgba(45, 27, 61, 0.35);
+      position: relative;
+      max-height: min(90vh, 720px);
+      overflow-y: auto;
+    }
+
+    .letter-card h2 {
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    .close-letter {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      border: none;
+      background: rgba(0, 0, 0, 0.05);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .letter-body p {
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    audio {
+      display: none;
+    }
+
+    .floating-hearts span {
+      position: fixed;
+      font-size: 1.2rem;
+      animation: float 6s linear infinite;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-120px) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 2rem 1rem 1.25rem;
+      }
+
+      section {
+        padding: 1.25rem;
+      }
+
+      .love-note {
+        padding-left: 2.75rem;
+      }
+    }
+  </style>
+</head>
+<body class="locked">
+  <div class="game-gate" id="gameGate">
+    <div class="gate-card">
+      <h2>Love Quest Entry</h2>
+      <p>Enter our safeword to slip into the cozy part of the internet.</p>
+      <div class="click-grid">
+        <input
+          type="password"
+          id="safewordInput"
+          placeholder="Safeword"
+          aria-label="Safeword"
+          style="padding:0.85rem 1rem;border-radius:20px;border:1px solid rgba(0,0,0,0.2);font-size:1rem;width:100%;"
+        />
+        <button class="click-btn" id="safewordBtn">Let me in</button>
+      </div>
+      <p class="gate-status" id="gateStatus">Hint: Starts with p....</p>
+    </div>
+  </div>
+  <main>
+    <header>
+      <h1>Happy First Anniversary, My Love!</h1>
+      <p>365 sunsets, 365 laughs, endless reasons to adore you.</p>
+    </header>
+    <section>
+      <div class="love-meter">
+        <h2>Heart Beat-O-Matic</h2>
+        <p>Slide to watch our giant heart match how full mine feels.</p>
+        <div class="heart-graphic">
+          <span id="heartIcon">♥</span>
+          <small id="heartScaleLabel">65% full of you</small>
+        </div>
+        <input type="range" id="meterRange" min="40" max="120" value="65" />
+      </div>
+
+      <div class="deck">
+        <article class="card">
+          <h3>Favorite Day</h3>
+          <p>The day we decided to be us forever. Every beat since echoes that yes.</p>
+        </article>
+        <article class="card">
+          <h3>Our Song</h3>
+          <p>"CO2" by Prateek Kuhad on loop, me humming the soft bits louder than the speakers.</p>
+        </article>
+        <article class="card">
+          <h3>Little Traditions</h3>
+          <p>Okay then goodbyes , guitar serenades, reading your poems until I fall asleep mid-sentence.</p>
+        </article>
+      </div>
+
+      <div class="memory-slider">
+        <small>Tap to shuffle memories</small>
+        <div class="memory-text" id="memoryText">That first shy smile still lights up everything.</div>
+        <button id="memoryBtn">Next Memory</button>
+      </div>
+
+      <div class="love-notes">
+        <div class="love-note">Our first kiss in that building lobby is permanently replaying in my head.</div>
+        <div class="love-note">Remember how we owned the garba circle even when we were drenched?</div>
+        <div class="love-note">I’ll keep singing and strumming for you, even when my fingers go numb.</div>
+      </div>
+
+      <div class="photo-gallery">
+        <div class="gallery-track" id="galleryTrack">
+          <figure class="photo-card">
+            <img src="images/garba-hug.jpg" alt="Us smiling during garba night" />
+            <figcaption>My favorite picture together</figcaption>
+          </figure>
+          <figure class="photo-card">
+            <img src="images/sunglasses-moment.png" alt="Her smiling with sunglasses" />
+            <figcaption>Her superstar energy.</figcaption>
+          </figure>
+          <figure class="photo-card">
+            <img src="images/first-kiss.jpg" alt="Us sharing our first kiss" />
+            <figcaption>Every kiss is still my favorite story.</figcaption>
+          </figure>
+          <figure class="photo-card">
+            <img src="images/cheek-kiss.jpg" alt="Cheek kiss selfie" />
+            <figcaption>Stolen kisses in crowded rooms.</figcaption>
+          </figure>
+        </div>
+        <div class="gallery-controls">
+          <button class="gallery-nav" id="galleryPrev" aria-label="Previous photo">‹</button>
+          <button class="gallery-nav" id="galleryNext" aria-label="Next photo">›</button>
+        </div>
+      </div>
+
+    </section>
+    <div class="footer">
+      <p>I love you more today than yesterday, but less than tomorrow.</p>
+      <button id="secretBtn">Tap for a surprise</button>
+      <button class="love-letter-btn" id="letterBtn">Open love letter ♥</button>
+    </div>
+  </main>
+
+  <div class="floating-hearts" id="hearts"></div>
+  <audio id="bgSong" src="Co2-(WapKing).mp3" loop preload="auto"></audio>
+  <div class="letter-modal" id="letterModal" aria-hidden="true">
+    <article class="letter-card" role="dialog" aria-modal="true">
+      <button class="close-letter" id="closeLetter" aria-label="Close letter">×</button>
+      <h2>My forever letter to you</h2>
+      <div class="letter-body">
+        <p>My dearest Greenie and my beautiful Baby Princess,</p>
+        <p>I love you more than I can describe with words. I love you more than anything else in this life. And I promise to keep loving you, protecting you, choosing you, and cherishing you for every year that follows.</p>
+        <p>Happy first anniversary, my love. It still feels unreal to say that. One whole year with you. One whole year of laughter, growth, memories, understanding, and love. One whole year of being lucky enough to call you mine. As I sit down to write this, my heart feels full in a way I never knew was possible before you came into my life. I want this letter to be something you can read and feel every emotion I feel for you, every bit of affection, love, and admiration I have for you. You deserve that and so much more.</p>
+        <p>Thinking back to when we first met feels like looking at a beautiful beginning we didn’t even realize we were stepping into. I remember the first moment I saw you so clearly. I remember the way something inside me shifted. I didn’t know you yet, but something about you drew me in instantly. It was your presence, your energy, the softness in your eyes, and the way your smile lit up everything around you. I don’t think you realize how powerful that smile is. I don’t think you fully understand just how beautiful you are, not just physically but in every small detail that makes you who you are.</p>
+        <p>And now a year later, I am even more captivated by you. I have gotten to know the little things about you, the things that make you so uniquely you. The way you overthink sometimes but still manage to stay strong. The way you express your love through the smallest gestures. The way you laugh when you’re really happy, the adorable little expressions you make when you’re pretending to be annoyed, the softness you show when you’re comfortable. Every part of you is unforgettable to me.</p>
+        <p>This year with you has been the best year of my life. I mean that with my whole heart. You have changed me in ways I didn’t even know I could change. You’ve made me happier. You’ve made me more patient. You’ve made me more hopeful. You’ve made me feel loved in a way that feels safe and soft and real—a way that feels like home. When I call you Greenie it’s more than just a nickname. It’s a name that carries warmth and love, because it reminds me of the freshness and calmness you’ve brought into my life. And when I call you my Baby Princess it’s because you truly are someone I want to protect, cherish, and treat with the gentleness you deserve.</p>
+        <p>There were moments this year when I caught myself just watching you. Moments when you didn’t even realize I was looking. Moments when your hair fell over your face a certain way or when you laughed at something silly or when you were lost in your own thoughts. And in every one of those moments I felt this overwhelming wave of love wash over me. I would just think to myself “she’s mine; I get to love her.” And I swear nothing has ever felt more right.</p>
+        <p>You are breathtaking, Bhavika. Inside and out. Your beauty is not just something people see; it’s something people feel. It’s in your kindness. It’s in the way you care about others deeply. It’s in your honesty, your loyalty, your softness, your strength. There is this glow about you that makes the world feel lighter. And I genuinely mean it when I say you are the most beautiful person I have ever known.</p>
+        <p>This past year, we’ve had moments where we laughed until it hurt, moments where we sat in silence but felt completely at peace, moments where we comforted each other, moments where we teased each other, and moments where we grew closer in ways I didn’t even think were possible. Every one of those moments is something I hold close to my heart. There hasn’t been a single boring day with you. Even the quiet days feel special because they’re with you.</p>
+        <p>I love how we’ve created our own little world. Our inside jokes. Our late-night talks. The way we talk about the future with this mix of excitement and comfort. The way you say my name. The way we can be goofy together without caring about anything else. The way your voice softens when you call me baby or love. These things might look small to other people but to me they are everything. They are the pieces of us that make our relationship so real and so beautiful.</p>
+        <p>I want you to know something. If I had the chance to go back in time and choose anyone in the world to be with, I would choose you again every single time. I would choose your laughter, your softness, your strength, your stubbornness, your affection, your heart. I would choose the tears and the challenges too, because even those moments with you are better than anything without you. Loving you has been the best decision I’ve ever made in my life, and I will keep choosing you again and again for the rest of my life.</p>
+        <p>You’ve taught me what real love feels like. It’s not just the big romantic gestures. It’s the small things. It’s caring about each other’s day. It’s wanting to understand each other. It’s the way you comfort me when I’m stressed. It’s the times you check on me even when you’re tired. It’s the times you make me laugh after long days. It’s how safe you make me feel. That’s love. And I’ve felt all of that with you.</p>
+        <p>I know we’re only one year into this journey, but I already know that I want many more years with you. I want to celebrate every anniversary with you. I want to experience life with you. I want to grow with you, learn with you, and build a future with you. I want to hold your hand through every high and every low. I want to be there for you on your best days and your worst ones. You deserve someone who will love you unconditionally, someone who will protect your heart, and someone who will remind you every day how much you matter. I want to be that person for you forever.</p>
+        <p>You have given me a love that makes me feel whole. A love that feels gentle, strong, and real. And I want you to know that I am here for you always. No matter what. I will be here through everything life brings our way. I will always support you, always care for you, always appreciate you, and always love you.</p>
+        <p>I look at you and I don’t just see the girl I love. I see the girl I want to build a life with. I see the girl I want to make memories with. I see the girl I want to hold on the tough days and kiss on the good days. I see the girl I want to wake up next to one day. I see the girl I want to laugh with when we’re old. I see everything I’ve ever wanted and more.</p>
+        <p>So on this first anniversary I want to say thank you. Thank you for loving me. Thank you for trusting me. Thank you for being patient with me. Thank you for being honest with me. Thank you for showing me the kind of love I didn’t even know I needed. Thank you for every moment you shared with me. Thank you for being my Bhavika. Thank you for being my Greenie. Thank you for being my Baby Princess. Thank you for being the most beautiful part of my world.</p>
+        <p>I love you more than I can describe with words. I love you more than anything else in this life. And I promise to keep loving you, protecting you, choosing you, and cherishing you for every year that follows.</p>
+        <p>Happy first anniversary, my love. Here’s to us and to everything that’s coming. I can’t wait for our future together.</p>
+        <p>Forever yours,<br />Aarush</p>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    const body = document.body;
+    const meterRange = document.getElementById("meterRange");
+    const heartIcon = document.getElementById("heartIcon");
+    const heartScaleLabel = document.getElementById("heartScaleLabel");
+    const memoryText = document.getElementById("memoryText");
+    const memoryBtn = document.getElementById("memoryBtn");
+    const secretBtn = document.getElementById("secretBtn");
+    const heartsContainer = document.getElementById("hearts");
+    const gateStatus = document.getElementById("gateStatus");
+    const gameGate = document.getElementById("gameGate");
+    const safewordInput = document.getElementById("safewordInput");
+    const safewordBtn = document.getElementById("safewordBtn");
+    const galleryTrack = document.getElementById("galleryTrack");
+    const galleryPrev = document.getElementById("galleryPrev");
+    const galleryNext = document.getElementById("galleryNext");
+    const bgSong = document.getElementById("bgSong");
+    const letterBtn = document.getElementById("letterBtn");
+    const letterModal = document.getElementById("letterModal");
+    const closeLetter = document.getElementById("closeLetter");
+
+    const memories = [
+      "Our first kiss on the rooftop tasted like rain and forever.",
+      "We danced garba till our feet hurt and still wanted one more song.",
+      "You strummed CO2 on my guitar and every chord felt like home.",
+      "Reading you poems while you hid your smile behind the pages.",
+      "That first shy smile still lights up everything."
+    ];
+
+    let memoryIndex = 0;
+
+    const playfulMisses = [
+      "Almost! try another sparkle.",
+      "Nope, but your smile counts.",
+      "Missed it, but still cute!",
+      "Close! hearts are shy today."
+    ];
+
+    const updateMeter = () => {
+      const percent = meterRange.value;
+      const scale = percent / 65;
+      heartIcon.style.transform = `scale(${scale})`;
+      heartScaleLabel.textContent = `${percent}% full of you`;
+    };
+
+    meterRange.addEventListener("input", updateMeter);
+    window.addEventListener("load", () => {
+      updateMeter();
+    });
+
+    memoryBtn.addEventListener("click", () => {
+      memoryIndex = (memoryIndex + 1) % memories.length;
+      memoryText.textContent = memories[memoryIndex];
+      memoryBtn.disabled = true;
+      setTimeout(() => (memoryBtn.disabled = false), 300);
+    });
+
+    const createHeart = () => {
+      const heart = document.createElement("span");
+      heart.textContent = "♥";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.top = innerHeight - 80 + "px";
+      heart.style.opacity = Math.random() * 0.5 + 0.4;
+      heart.style.animationDuration = Math.random() * 3 + 3 + "s";
+      heart.style.fontSize = Math.random() * 1.4 + 1.8 + "rem";
+      heartsContainer.appendChild(heart);
+      setTimeout(() => heart.remove(), 6000);
+    };
+
+    secretBtn.addEventListener("click", () => {
+      for (let i = 0; i < 12; i++) {
+        setTimeout(createHeart, i * 150);
+      }
+      secretBtn.textContent = "You + Me = Always";
+    });
+
+    // Safeword gate
+    const safeword = "pesto";
+    let gateUnlocked = false;
+
+    const unlockGate = () => {
+      gateUnlocked = true;
+      gateStatus.textContent = "Safeword accepted. Welcome home ♥";
+      if (bgSong) {
+        bgSong.volume = 0.8;
+        const tryPlay = () =>
+          bgSong
+            .play()
+            .catch(() => {
+              gateStatus.textContent =
+                "Safeword accepted. Tap anywhere to let CO2 start playing ♥";
+              window.addEventListener(
+                "pointerdown",
+                () => bgSong.play().catch(() => {}),
+                { once: true }
+              );
+            });
+        tryPlay();
+      }
+      setTimeout(() => {
+        body.classList.remove("locked");
+        gameGate.classList.add("gate-hidden");
+        document.querySelector("main").scrollIntoView({ behavior: "smooth" });
+      }, 400);
+      setTimeout(() => gameGate.remove(), 1200);
+    };
+
+    const checkSafeword = () => {
+      if (gateUnlocked) return;
+      const guess = safewordInput.value.trim().toLowerCase();
+      if (!guess) {
+        gateStatus.textContent = "Type it like you whisper it to me.";
+        return;
+      }
+      if (guess === safeword) {
+        unlockGate();
+      } else {
+        gateStatus.textContent = playfulMisses[Math.floor(Math.random() * playfulMisses.length)];
+        safewordInput.value = "";
+        safewordInput.focus();
+      }
+    };
+
+    safewordBtn.addEventListener("click", checkSafeword);
+    safewordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        checkSafeword();
+      }
+    });
+
+    const scrollGallery = (direction) => {
+      if (!galleryTrack) return;
+      const amount = galleryTrack.clientWidth * 0.8 * direction;
+      galleryTrack.scrollBy({ left: amount, behavior: "smooth" });
+    };
+
+    galleryPrev?.addEventListener("click", () => scrollGallery(-1));
+    galleryNext?.addEventListener("click", () => scrollGallery(1));
+
+    const toggleLetter = (open) => {
+      if (!letterModal) return;
+      letterModal.classList.toggle("open", open);
+      letterModal.setAttribute("aria-hidden", open ? "false" : "true");
+    };
+
+    letterBtn?.addEventListener("click", () => toggleLetter(true));
+    closeLetter?.addEventListener("click", () => toggleLetter(false));
+    letterModal?.addEventListener("click", (event) => {
+      if (event.target === letterModal) {
+        toggleLetter(false);
+      }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        toggleLetter(false);
+      }
+    });
+  </script>
+</body>
+</html>
